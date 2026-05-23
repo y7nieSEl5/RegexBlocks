@@ -47,7 +47,7 @@ private:
     void loadSettings();
     void saveSettings();
 
-    // 控件
+    // UI 组件
     QSplitter    *m_splitter   = nullptr;
     BlockPalette *m_palette    = nullptr;
     BlockCanvas  *m_canvas     = nullptr;

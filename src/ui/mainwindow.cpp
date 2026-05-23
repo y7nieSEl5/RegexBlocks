@@ -45,31 +45,34 @@ MainWindow::MainWindow(QWidget *parent)
     setupMenu();
     resize(1280, 800);
 
-    // Canvas 积木变化 -> 重新编译正则 -> 推送到测试面板 (慢路径: 跑匹配 + 标脏)
+    // 积木改变 -> 重新编译正则, 更新 TestPanel 显示, 标脏
+    // 用户改了积木但还没保存 → 标记当前状态为"脏" (dirty), 关闭窗口时提示保存.
+    // 满路径：BlockCanvas::blocksChanged → RegexCompiler::compile → TestPanel::setRegex (更新显示) + MainWindow::setDirty(true)
     connect(m_canvas, &BlockCanvas::blocksChanged, this, [this]() {
         const auto r = RegexCompiler::compile(m_canvas->orderedBlocks());
         m_testPanel->setRegex(r.regex, r.valid, r.warning);
         setDirty(true);
     });
 
-    // 拖动 60Hz 期间持续刷新右上角文本框 (快路径: 不跑匹配, 不标脏)
+    // 拖动 60Hz 期间持续刷新右上角文本框 (快路径)
     connect(m_canvas, &BlockCanvas::blocksPreviewing, this, [this]() {
         const auto r = RegexCompiler::compile(m_canvas->orderedBlocks());
         m_testPanel->setRegexPreview(r.regex);
     });
 
-    // 用户在右上角输入框按 Enter / 失焦 -> 反向解析为积木树, 替换画布
+    // 用户输入正则字符串 → RegexParser::parse → BlockCanvas::loadJson (替换积木树) + MainWindow::setDirty(true)
     connect(m_testPanel, &TestPanel::regexEditedByUser,
             this, &MainWindow::onRegexImported);
 
     // 复制代码片段 -> 状态栏提示
     connect(m_testPanel, &TestPanel::snippetCopied, this, [this](const QString &lang) {
         statusBar()->showMessage(tr("已复制 %1 代码片段").arg(lang), 3000);
+        // %1：占位符, arg(lang) 会替换 %1 为 lang 的值 (如 "PCRE" / "Python" / "JavaScript" 等), 3000 毫秒后自动清除提示
     });
 
     // TestPanel 匹配数 -> 状态栏
     connect(m_testPanel, &TestPanel::matchCountChanged, this, [this](int n) {
-        statusBar()->showMessage(tr("找到 %1 处匹配  |  积木数 %2")
+        statusBar()->showMessage(tr("找到 %1 处匹配  |  积木数 %2") // %2: 占位符, arg(m_canvas->blockCount()) 替换为当前积木总数, 3000ms 后清除提示
                                      .arg(n).arg(m_canvas->blockCount()));
     });
 
@@ -167,7 +170,7 @@ void MainWindow::setupMenu() {
     const auto templates = tpl::allTemplates();
     for (int i = 0; i < templates.size(); ++i) {
         const auto &t = templates[i];
-        // QKeySequence(tr("Ctrl+1")) - Mac 自动转 Cmd+1
+        // QKeySequence(tr("Ctrl+1")) - Mac 自动转 Cmd+1, Windows/Linux 是 Ctrl+1
         auto *act = tplMenu->addAction(
             tr("%1\t%2").arg(t.name, t.sampleRegex),
             QKeySequence(tr("Ctrl+%1").arg(i + 1)),
