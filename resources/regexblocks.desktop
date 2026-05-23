@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=RegexBlocks
+GenericName=Regex Block Builder
+GenericName[zh_CN]=正则积木构造器
+Comment=Drag-and-drop visual regular expression tester
+Comment[zh_CN]=拖拽式可视化正则表达式测试器
+Exec=RegexBlocks %f
+Icon=regexblocks
+Terminal=false
+Categories=Development;Utility;
+MimeType=application/x-regexblocks;
+Keywords=regex;regular expression;developer;tools;
+StartupNotify=true
