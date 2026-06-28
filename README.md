@@ -150,3 +150,8 @@ sudo apt install qt6-base-dev cmake ninja-build
 ---
 
 **RegexBlocks** — 让正则表达式变得简单、直观、有趣。
+您也可以通过如下途径得到中文演示视频
+https://disk.pku.edu.cn/link/AA491CF6E0C29D47E8B037ABCD31A2AC1A
+文件名：中文演示.mp4
+有效期限：2027-07-29 01:29
+提取码：0D4J
